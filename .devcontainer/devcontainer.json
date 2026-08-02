@@ -1,0 +1,38 @@
+{
+  "name": "tennis-ai-dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "codespace",
+  "forwardPorts": [
+    3000,
+    8000,
+    5432
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Flutter Web"
+    },
+    "8000": {
+      "label": "FastAPI"
+    },
+    "5432": {
+      "label": "PostgreSQL"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "dart.flutterSdkPath": "/opt/flutter"
+      },
+      "extensions": [
+        "Dart-Code.dart-code",
+        "Dart-Code.flutter",
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "openai.chatgpt"
+      ]
+    }
+  }
+}
