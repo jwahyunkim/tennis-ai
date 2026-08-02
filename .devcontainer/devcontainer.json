@@ -34,5 +34,6 @@
         "openai.chatgpt"
       ]
     }
-  }
+  },
+  "postCreateCommand": "mkdir -p /workspaces/.codex-persist && bash .devcontainer/scripts/setup-codex-persistence.sh || true"
 }

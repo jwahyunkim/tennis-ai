@@ -14,10 +14,14 @@ ENV PATH=${JAVA_HOME}/bin:${FLUTTER_HOME}/bin:${FLUTTER_HOME}/bin/cache/dart-sdk
 
 USER root
 
-RUN apt-get update \
+# Remove the outdated Yarn APT source inherited from the base image.
+RUN grep -rl "dl.yarnpkg.com" /etc/apt/sources.list.d 2>/dev/null \
+        | xargs -r rm -f \
+    && apt-get update \
     && apt-get install -y \
         curl \
         git \
+        git-lfs \
         unzip \
         xz-utils \
         zip \
@@ -63,3 +67,10 @@ RUN curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_RELEASE=${CODEX_VERS
     && /home/codespace/.local/bin/codex --version
 
 ENV PATH=/home/codespace/.local/bin:${PATH}
+
+
+# Persist Flutter/Android SDK PATH for interactive shells
+RUN printf '\n# Flutter\nexport PATH=/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:$PATH\n' >> /home/codespace/.bashrc
+
+# Warm Flutter cache
+RUN /opt/flutter/bin/flutter doctor || true
