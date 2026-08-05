@@ -72,5 +72,12 @@ ENV PATH=/home/codespace/.local/bin:${PATH}
 # Persist Flutter/Android SDK PATH for interactive shells
 RUN printf '\n# Flutter\nexport PATH=/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:$PATH\n' >> /home/codespace/.bashrc
 
-# Warm Flutter cache
-RUN /opt/flutter/bin/flutter doctor || true
+# Verify only the toolchain required for Android development.
+RUN /opt/flutter/bin/flutter --version \
+    && /opt/flutter/bin/dart --version \
+    && test -x /opt/android-sdk/platform-tools/adb \
+    && /opt/android-sdk/platform-tools/adb version \
+    && test -f /opt/android-sdk/platforms/android-36/android.jar \
+    && test -d /opt/android-sdk/build-tools/36.0.0 \
+    && test -x /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+    && /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --version

@@ -5,6 +5,12 @@
     "context": ".."
   },
   "remoteUser": "codespace",
+  "remoteEnv": {
+    "FLUTTER_HOME": "/opt/flutter",
+    "ANDROID_HOME": "/opt/android-sdk",
+    "ANDROID_SDK_ROOT": "/opt/android-sdk",
+    "PATH": "/home/codespace/.local/bin:/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:${containerEnv:PATH}"
+  },
   "forwardPorts": [
     3000,
     8000,
@@ -35,5 +41,5 @@
       ]
     }
   },
-  "postCreateCommand": "mkdir -p /workspaces/.codex-persist && bash .devcontainer/scripts/setup-codex-persistence.sh || true"
+  "postCreateCommand": "bash .devcontainer/scripts/setup-codex-persistence.sh"
 }
