@@ -22,12 +22,16 @@ RUN grep -rl "dl.yarnpkg.com" /etc/apt/sources.list.d 2>/dev/null \
         curl \
         git \
         git-lfs \
+        ripgrep \
+        shellcheck \
         unzip \
         xz-utils \
         zip \
         openjdk-17-jdk \
         libglu1-mesa \
     && rm -rf /var/lib/apt/lists/*
+
+COPY .devcontainer/scripts/dev-env.sh /etc/profile.d/tennis-ai.sh
 
 RUN curl -fsSL \
         "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
@@ -70,7 +74,7 @@ ENV PATH=/home/codespace/.local/bin:${PATH}
 
 
 # Persist Flutter/Android SDK PATH for interactive shells
-RUN printf '\n# Flutter\nexport PATH=/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:$PATH\n' >> /home/codespace/.bashrc
+RUN printf '\n# Flutter\n. /etc/profile.d/tennis-ai.sh\n' >> /home/codespace/.bashrc
 
 # Verify only the toolchain required for Android development.
 RUN /opt/flutter/bin/flutter --version \

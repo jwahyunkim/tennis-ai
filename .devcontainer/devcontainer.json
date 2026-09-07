@@ -9,7 +9,8 @@
     "FLUTTER_HOME": "/opt/flutter",
     "ANDROID_HOME": "/opt/android-sdk",
     "ANDROID_SDK_ROOT": "/opt/android-sdk",
-    "PATH": "/home/codespace/.local/bin:/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:${containerEnv:PATH}"
+    "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+    "PATH": "/home/codespace/.local/bin:/usr/lib/jvm/java-17-openjdk-amd64/bin:/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:${containerEnv:PATH}"
   },
   "forwardPorts": [
     3000,
@@ -24,13 +25,15 @@
       "label": "FastAPI"
     },
     "5432": {
-      "label": "PostgreSQL"
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
     }
   },
   "customizations": {
     "vscode": {
       "settings": {
-        "dart.flutterSdkPath": "/opt/flutter"
+        "dart.flutterSdkPath": "/opt/flutter",
+        "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python"
       },
       "extensions": [
         "Dart-Code.dart-code",
@@ -41,5 +44,6 @@
       ]
     }
   },
-  "postCreateCommand": "bash .devcontainer/scripts/setup-codex-persistence.sh"
+  "postCreateCommand": "bash .devcontainer/scripts/setup-codex-persistence.sh && bash .devcontainer/scripts/setup-development.sh",
+  "postStartCommand": "bash .devcontainer/scripts/start-services.sh"
 }

@@ -1,0 +1,13 @@
+.git
+.dart_tool
+build
+**/.gradle
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.env
+**/.env.*
+!**/.env.example
+**/local.properties
+**/*.log
