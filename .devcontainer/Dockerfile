@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/devcontainers/universal:2-linux
 ARG DEBIAN_FRONTEND=noninteractive
 ARG FLUTTER_VERSION=3.44.7
 ARG ANDROID_COMMAND_LINE_TOOLS_VERSION=15859902
-ARG CODEX_VERSION=0.146.0
+ARG CODEX_VERSION=0.153.4
 
 ENV FLUTTER_HOME=/opt/flutter \
     ANDROID_HOME=/opt/android-sdk \
