@@ -16,6 +16,20 @@ Backend API 소스, 데이터 모델과 Alembic 마이그레이션은 아직 없
 Riverpod 연동과 AI 추론 기능도 다음 구현 단계입니다. AI 프레임워크와 모델 가중치는
 모델·실행 방식이 정해진 후 추가합니다.
 
+## Git 작업 선택
+
+기본 전략은 **main + 작업 브랜치 + PR**입니다. 현재 Dev Container에 있는
+Node.js 22 이상과 npm 9 이상으로 실행하며, 추가 npm 패키지 설치는 필요 없습니다.
+
+```bash
+npm run git
+```
+
+번호를 선택해 작업 시작, 파일 선택 커밋, 동기화, 푸시, 초안 PR,
+태그 생성·게시, main 복귀를 실행합니다. 변경 작업은 실행 계획을 보여준 뒤 적용합니다.
+명령별 옵션은 `npm run git:help`, 전략과 예시는 [Git 작업 안내](docs/git-workflow.md)를 확인하세요.
+Git 도구 테스트는 `npm run test:git`으로 실행합니다.
+
 ## 개발환경 시작
 
 GitHub Codespaces 또는 이 저장소의 Dev Container를 사용합니다.
