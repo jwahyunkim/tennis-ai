@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-readonly PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly PROJECT_ROOT
 # shellcheck source=.devcontainer/scripts/dev-env.sh
 source "${PROJECT_ROOT}/.devcontainer/scripts/dev-env.sh"
 cd "${PROJECT_ROOT}"

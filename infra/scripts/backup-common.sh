@@ -3,7 +3,8 @@
 # Shared checks for the single-host Compose backup and restore commands.
 set -euo pipefail
 
-readonly PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly PROJECT_ROOT
 readonly -a COMPOSE=(docker compose --env-file "${PROJECT_ROOT}/infra/.env" -f "${PROJECT_ROOT}/infra/compose.yaml" --profile app)
 
 require_external_directory() {
