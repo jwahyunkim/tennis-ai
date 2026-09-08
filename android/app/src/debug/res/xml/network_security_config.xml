@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Development API URLs may point to the emulator host or a local machine. -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

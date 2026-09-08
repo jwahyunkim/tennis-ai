@@ -56,3 +56,17 @@ htmlcov/
 .env
 .env.*
 !.env.example
+
+# User media, database backups, external AI model weights, and Android signing keys
+/media/
+/backups/
+*.dump
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.ckpt
+*.safetensors
+*.jks
+*.keystore
+/android/key.properties

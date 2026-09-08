@@ -9,6 +9,8 @@ cd "${PROJECT_ROOT}"
 
 flutter analyze
 flutter test
+command -v ffprobe >/dev/null
+shellcheck .devcontainer/scripts/*.sh infra/scripts/*.sh
 backend/.venv/bin/python -m pip check
 
 # Exercise the backend API, including a real async PostgreSQL readiness check.

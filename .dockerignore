@@ -11,3 +11,16 @@ build
 !**/.env.example
 **/local.properties
 **/*.log
+backend/tests
+media
+backups
+**/*.dump
+**/*.pt
+**/*.pth
+**/*.onnx
+**/*.tflite
+**/*.ckpt
+**/*.safetensors
+**/*.jks
+**/*.keystore
+android/key.properties

@@ -30,4 +30,5 @@ if not env_path.exists():
 PY
 
 bash .devcontainer/scripts/start-services.sh
+backend/.venv/bin/alembic -c backend/alembic.ini upgrade head
 echo "Development setup complete. Activate Python with: source backend/.venv/bin/activate"
