@@ -2,13 +2,16 @@
 
 set -euo pipefail
 
-readonly PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly PROJECT_ROOT
 # shellcheck source=.devcontainer/scripts/dev-env.sh
 source "${PROJECT_ROOT}/.devcontainer/scripts/dev-env.sh"
 cd "${PROJECT_ROOT}"
 
 flutter analyze
 flutter test
+command -v ffprobe >/dev/null
+shellcheck .devcontainer/scripts/*.sh infra/scripts/*.sh
 backend/.venv/bin/python -m pip check
 
 # Exercise the backend API, including a real async PostgreSQL readiness check.

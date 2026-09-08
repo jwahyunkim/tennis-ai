@@ -1,26 +1,39 @@
 # Tennis AI
 
-Flutter Android 앱과 FastAPI/PostgreSQL 기반 테니스 코칭 프로젝트입니다.
+사용자가 테니스 영상을 올리고, 이후 AI가 움직임과 체형을 반영한 3D 모델을 생성하는
+Flutter Android · FastAPI · PostgreSQL 프로젝트입니다.
+
+## 작업 재개와 진행 기록
+
+다음 AI 또는 개발자는 [프로젝트 현황과 인수인계](docs/project-status.md)를 먼저 읽습니다.
+완료·진행 중·대기 업무, 검증 결과, 다음 작업을 이 문서에서 관리합니다.
+[로드맵과 선택·비용 비교](docs/roadmap.md)에는 이번 대화에서 논의한 AI·클라우드 계획과
+미결정 사항을 정리했습니다. 실행·백업·복원 절차는 [운영 가이드](docs/operations.md)를 따릅니다.
+
+새 업무, 진행, 결정, 완료와 중단 사유는 `AGENTS.md`의 기록 규칙에 따라 Markdown에 갱신합니다.
 
 ## 현재 상태
 
 | 영역 | 준비 상태 |
 | --- | --- |
 | Android | Flutter 3.44.7 / Dart 3.12.2, Android SDK 36, JDK 17 |
-| Flutter 앱 | Material 3 홈 화면과 위젯 테스트. 앱은 저장소 루트에 위치 |
+| Flutter 앱 | Material 3·Riverpod, 인증·프로필·영상 업로드·목록·재생·작업 상태·3D 결과 화면. 앱은 저장소 루트에 위치 |
 | Backend 환경 | Python 3.12 가상환경, FastAPI/Uvicorn, 비동기 SQLAlchemy/asyncpg, Alembic, 테스트·린트 도구 |
-| Backend API | FastAPI 상태 확인 API, 환경설정 검증, 비동기 DB 세션, Alembic 기반 |
+| Backend API | 인증·세션·사용자 권한, 영상 저장·조회·삭제, 작업 재시도·취소, GLB 결과 계약, Alembic 마이그레이션 |
 | PostgreSQL | Docker Compose로 실행하는 PostgreSQL 18.6, 상태 확인 및 데이터 볼륨 |
-| 개발 도구 | Dev Container, Flutter/Python VS Code 확장, ripgrep, ShellCheck |
+| 영상 처리 | 별도 worker의 FFprobe 검증, 크기·길이·사용자 저장 용량 제한, 로컬/S3 저장소 |
+| 개발·운영 | Dev Container, GitHub Actions CI, 비루트 Docker 이미지, 요청 로그·상태 검사, 백업·복원 |
 
-코칭 데이터 모델과 실제 Alembic 리비전, Flutter API 연결과 Riverpod 연동,
-AI 추론 기능은 다음 구현 단계입니다. AI 프레임워크와 모델 가중치는
-모델·실행 방식이 정해진 후 추가합니다.
+현재 구현은 **AI 학습·추론을 연결하기 전의 사용자·영상·작업·결과 관리 플랫폼**입니다.
+worker는 영상 메타데이터를 검증한 뒤 작업을 `awaiting_model`로 전환합니다.
+현재 사용자 체형·움직임을 추정하거나 3D 모델을 생성하지 않습니다. 모델이 연결되지 않은
+영상에는 대기 상태를 표시하며 샘플 모델을 사용자 분석 결과처럼 보여주지 않습니다.
+관절·근육·선수 동작 분석 파라미터와 학습 데이터·모델은 후속 단계에서 결정합니다.
 
 ## 개발환경 시작
 
 GitHub Codespaces 또는 이 저장소의 Dev Container를 사용합니다.
-컨테이너 생성 시 의존성을 설치하고 PostgreSQL을 시작합니다.
+컨테이너 생성 시 의존성을 설치하고 PostgreSQL 시작 후 Alembic 마이그레이션을 적용합니다.
 이후 컨테이너를 시작할 때도 PostgreSQL의 준비 상태를 확인합니다.
 
 이미 열린 Codespace에서 설정을 적용하거나 의존성을 다시 설치하려면 저장소 루트에서 실행합니다.
@@ -35,6 +48,8 @@ source backend/.venv/bin/activate
 `infra/.env`가 없을 때만 임의의 DB 비밀번호를 생성하며 기존 설정은 보존합니다.
 가상환경과 실제 `.env` 파일은 Git에서 제외됩니다.
 Dev Container 설정 자체를 변경한 경우 이후 새 컨테이너에도 적용하려면 Rebuild Container를 사용합니다.
+영상 검사에는 `ffprobe`가 필요합니다. 새 Dev Container에는 FFmpeg가 포함되며,
+기존 컨테이너에 없다면 OS 패키지 `ffmpeg`를 설치합니다.
 
 ## 검증과 Android 빌드
 
@@ -43,14 +58,27 @@ bash .devcontainer/scripts/check-development.sh
 flutter build apk --debug
 ```
 
-검증 스크립트는 Flutter 정적 분석·테스트, Python 의존성·린트·포맷 검사,
-Backend 단위·HTTP 테스트, 실제 PostgreSQL readiness 검사와 Alembic 모델 차이를 확인합니다.
-PostgreSQL을 먼저 실행해야 하며, 테스트는 API 서버를 계속 실행하지 않습니다.
+검증 스크립트는 Flutter 정적 분석·테스트, ShellCheck, Python 의존성·린트·포맷 검사,
+Backend 단위·HTTP·PostgreSQL 통합 테스트와 Alembic 모델 차이를 확인합니다.
+PostgreSQL 시작과 개발 DB 마이그레이션은 먼저 setup 또는 명시적 `upgrade head`로 적용합니다.
+검증 스크립트는 개발 DB 스키마를 변경하지 않으며, 테스트는 API 서버를 계속 실행하지 않습니다.
+GitHub Actions도 별도 `tennis_ai_test` DB로 Backend를 검증하고 Flutter 분석·테스트와
+Android debug APK 빌드를 실행합니다. Actions 버전은 확인한 커밋으로 고정합니다.
+로컬 도메인 통합 테스트도 `tennis_ai_test`를 생성·마이그레이션한 뒤 사용합니다.
+`POSTGRES_TEST_DB`로 바꿀 수 있으며 `_test`로 끝나는 별도 DB만 허용합니다.
 
 APK 결과물은 `build/app/outputs/flutter-apk/app-debug.apk`입니다.
 기기에서 실행하려면 `flutter devices`로 연결을 확인한 후 `flutter run -d <device-id>`를 사용합니다.
 Codespaces에는 Android 기기나 에뮬레이터가 기본 연결되지 않습니다.
 Android 개발에는 Chrome 및 Linux 데스크톱용 `flutter doctor` 경고 해결이 필요하지 않습니다.
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
+```
+
+`API_BASE_URL`은 `/api/v1`을 제외한 API 원점 주소입니다. 위 주소는 Android
+에뮬레이터에서 개발 머신에 접근할 때 사용합니다. 실제 기기에서는 기기가 접근 가능한
+API 주소를 지정합니다. Release 앱은 HTTPS API 주소를 요구합니다.
 
 ## Backend API 실행
 
@@ -58,10 +86,13 @@ Android 개발에는 Chrome 및 Linux 데스크톱용 `flutter doctor` 경고 �
 
 ```bash
 bash .devcontainer/scripts/start-services.sh
-backend/.venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+backend/.venv/bin/alembic -c backend/alembic.ini upgrade head
+backend/.venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload --no-access-log
 ```
 
+별도 터미널에서 `backend/.venv/bin/python -m backend.worker`를 실행합니다.
 API 문서는 `http://127.0.0.1:8000/docs`에서 확인합니다.
+기능 API는 `/api/v1` 아래에 있으며 인증 이후 Bearer 토큰을 사용합니다.
 
 | 경로 | 정상 응답 | 용도 |
 | --- | --- | --- |
@@ -77,6 +108,9 @@ DB 장애나 제한 시간 초과 시 readiness는
 `POSTGRES_DB`·`POSTGRES_USER`(기본 `tennis_ai`),
 `DATABASE_TIMEOUT_SECONDS`(기본 5초, 0초 초과·60초 이하)를 설정할 수 있습니다.
 배포 환경에서는 환경변수 또는 비밀 관리 도구로 값을 주입합니다.
+영상 기본 저장 경로는 `~/.local/share/tennis-ai/media`로 저장소 밖에 있습니다.
+파일당 250 MiB, 최대 120초, 사용자별 원본 영상 2 GiB 제한이 기본값입니다. 세션 유효 기간,
+저장 용량과 S3 저장소 등 추가 설정은 [운영 가이드](docs/operations.md)를 참고합니다.
 
 DB 없이 실행하는 Backend 테스트와 실제 DB를 포함하는 테스트를 구분합니다.
 
@@ -93,8 +127,8 @@ DB 엔진은 앱 수명 동안 재사용하고 종료 시 해제합니다. 요�
 ## 데이터베이스 마이그레이션
 
 Alembic은 API와 같은 DB 설정과 `backend/models/base.py`의 메타데이터를 사용합니다.
-아직 도메인 테이블과 리비전은 없으며, 모델이 추가되면 `backend/models/__init__.py`에서
-가져와 메타데이터에 등록해야 합니다. 저장소 루트에서 현재 상태를 확인합니다.
+사용자·세션·영상·작업·결과 모델을 마이그레이션으로 관리합니다. 새 모델은
+`backend/models/__init__.py`에서 가져와 메타데이터에 등록합니다. 저장소 루트에서 상태를 확인합니다.
 
 ```bash
 backend/.venv/bin/alembic -c backend/alembic.ini current
@@ -125,6 +159,21 @@ docker compose --env-file infra/.env -f infra/compose.yaml stop
 Compose 데이터 볼륨은 서비스 재시작 시 유지됩니다. `down --volumes`는 데이터를 삭제합니다.
 Codespace 삭제나 컨테이너 재생성 전에는 필요한 개발 데이터를 별도로 백업합니다.
 DB 초기화 이후 `.env` 비밀번호만 바꾸면 기존 DB 계정의 비밀번호는 바뀌지 않습니다.
+
+## 전체 서비스와 운영
+
+`infra/.env`를 준비한 뒤 API·worker·마이그레이션을 함께 실행합니다.
+
+```bash
+docker compose --env-file infra/.env -f infra/compose.yaml --profile app up -d --build
+docker compose --env-file infra/.env -f infra/compose.yaml --profile app ps
+```
+
+PostgreSQL 준비 → 일회성 마이그레이션 → API·worker 순서로 실행합니다.
+API는 `127.0.0.1:8000`에 연결되며 영상은 별도 `media_data` 볼륨에 보존합니다.
+[운영 가이드](docs/operations.md)에 갱신·로그·백업·복원·Android 배포 서명 절차가 있습니다.
+공개 운영 시 선택한 호스트의 HTTPS 프록시·비밀·백업·알림을 연결합니다.
+현재 저장소 작업으로 특정 클라우드 리소스가 생성되거나 Play Store에 앱이 게시되지는 않습니다.
 
 ## Python 의존성 변경
 
