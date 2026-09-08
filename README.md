@@ -9,11 +9,12 @@ Flutter Android 앱과 FastAPI/PostgreSQL 기반 테니스 코칭 프로젝트�
 | Android | Flutter 3.44.7 / Dart 3.12.2, Android SDK 36, JDK 17 |
 | Flutter 앱 | Material 3 홈 화면과 위젯 테스트. 앱은 저장소 루트에 위치 |
 | Backend 환경 | Python 3.12 가상환경, FastAPI/Uvicorn, 비동기 SQLAlchemy/asyncpg, Alembic, 테스트·린트 도구 |
+| Backend API | FastAPI 상태 확인 API, 환경설정 검증, 비동기 DB 세션, Alembic 기반 |
 | PostgreSQL | Docker Compose로 실행하는 PostgreSQL 18.6, 상태 확인 및 데이터 볼륨 |
 | 개발 도구 | Dev Container, Flutter/Python VS Code 확장, ripgrep, ShellCheck |
 
-Backend API 소스, 데이터 모델과 Alembic 마이그레이션은 아직 없습니다.
-Riverpod 연동과 AI 추론 기능도 다음 구현 단계입니다. AI 프레임워크와 모델 가중치는
+코칭 데이터 모델과 실제 Alembic 리비전, Flutter API 연결과 Riverpod 연동,
+AI 추론 기능은 다음 구현 단계입니다. AI 프레임워크와 모델 가중치는
 모델·실행 방식이 정해진 후 추가합니다.
 
 ## 개발환경 시작
@@ -42,14 +43,68 @@ bash .devcontainer/scripts/check-development.sh
 flutter build apk --debug
 ```
 
-검증 스크립트는 Flutter 정적 분석·테스트, Python 의존성 검사,
-임시 FastAPI 앱의 HTTP 응답, 실제 PostgreSQL 비동기 접속을 확인합니다.
-임시 HTTP 검사는 서버를 계속 실행하지 않으며, 프로젝트 API가 구현됐다는 의미는 아닙니다.
+검증 스크립트는 Flutter 정적 분석·테스트, Python 의존성·린트·포맷 검사,
+Backend 단위·HTTP 테스트, 실제 PostgreSQL readiness 검사와 Alembic 모델 차이를 확인합니다.
+PostgreSQL을 먼저 실행해야 하며, 테스트는 API 서버를 계속 실행하지 않습니다.
 
 APK 결과물은 `build/app/outputs/flutter-apk/app-debug.apk`입니다.
 기기에서 실행하려면 `flutter devices`로 연결을 확인한 후 `flutter run -d <device-id>`를 사용합니다.
 Codespaces에는 Android 기기나 에뮬레이터가 기본 연결되지 않습니다.
 Android 개발에는 Chrome 및 Linux 데스크톱용 `flutter doctor` 경고 해결이 필요하지 않습니다.
+
+## Backend API 실행
+
+저장소 루트에서 실행합니다. 개발 DB 설정은 기존 `infra/.env`를 재사용합니다.
+
+```bash
+bash .devcontainer/scripts/start-services.sh
+backend/.venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+API 문서는 `http://127.0.0.1:8000/docs`에서 확인합니다.
+
+| 경로 | 정상 응답 | 용도 |
+| --- | --- | --- |
+| `GET /health` | `200 {"status":"ok"}` | DB 접속 없이 서버 응답 확인 |
+| `GET /health/ready` | `200 {"status":"ok","database":"ok"}` | 실제 PostgreSQL 쿼리 확인 |
+
+DB 장애나 제한 시간 초과 시 readiness는
+`503 {"status":"unavailable","database":"unavailable"}`를 반환합니다.
+접속 오류와 비밀번호는 응답에 포함하지 않습니다.
+
+환경변수는 `infra/.env`보다 우선합니다. `POSTGRES_PASSWORD`는 필수이며,
+`POSTGRES_HOST`(기본 `127.0.0.1`), `POSTGRES_PORT`(기본 `5432`),
+`POSTGRES_DB`·`POSTGRES_USER`(기본 `tennis_ai`),
+`DATABASE_TIMEOUT_SECONDS`(기본 5초, 0초 초과·60초 이하)를 설정할 수 있습니다.
+배포 환경에서는 환경변수 또는 비밀 관리 도구로 값을 주입합니다.
+
+DB 없이 실행하는 Backend 테스트와 실제 DB를 포함하는 테스트를 구분합니다.
+
+```bash
+backend/.venv/bin/python -m pytest -c backend/pyproject.toml
+RUN_DB_TESTS=1 backend/.venv/bin/python -m pytest -c backend/pyproject.toml
+```
+
+HTTP 라우터, 서비스, 저장소, 스키마와 공통 설정은 `backend/` 아래에서 분리합니다.
+DB 엔진은 앱 수명 동안 재사용하고 종료 시 해제합니다. 요청별 세션은 종료 시 닫으며,
+쓰기 작업의 트랜잭션과 커밋은 서비스에서 명시적으로 관리합니다.
+앱 시작 시 테이블을 생성하거나 마이그레이션을 실행하지 않습니다.
+
+## 데이터베이스 마이그레이션
+
+Alembic은 API와 같은 DB 설정과 `backend/models/base.py`의 메타데이터를 사용합니다.
+아직 도메인 테이블과 리비전은 없으며, 모델이 추가되면 `backend/models/__init__.py`에서
+가져와 메타데이터에 등록해야 합니다. 저장소 루트에서 현재 상태를 확인합니다.
+
+```bash
+backend/.venv/bin/alembic -c backend/alembic.ini current
+backend/.venv/bin/alembic -c backend/alembic.ini check
+```
+
+모델 변경 후 `revision --autogenerate -m "describe schema change"`로 리비전을 생성하고,
+생성된 내용을 검토한 뒤 `upgrade head`로 적용합니다. 두 명령 모두 위와 같이
+`backend/.venv/bin/alembic -c backend/alembic.ini` 뒤에 붙여 실행합니다.
+운영 스키마 변경은 검토한 Alembic 리비전으로만 수행합니다.
 
 ## PostgreSQL 관리
 
@@ -93,3 +148,8 @@ bash .devcontainer/scripts/setup-development.sh
 [Dev Container 생명주기](https://containers.dev/implementors/json_reference/),
 [PostgreSQL 공식 이미지](https://hub.docker.com/_/postgres),
 [pip-tools 의존성 잠금](https://pip-tools.readthedocs.io/en/stable/).
+
+Backend 구성 근거: [FastAPI lifespan](https://fastapi.tiangolo.com/advanced/events/),
+[SQLAlchemy 비동기 I/O](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html),
+[Pydantic 환경설정](https://docs.pydantic.dev/latest/concepts/pydantic_settings/),
+[Alembic 비동기 구성](https://alembic.sqlalchemy.org/en/latest/cookbook.html#using-asyncio-with-alembic).
