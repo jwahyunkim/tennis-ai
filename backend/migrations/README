@@ -1,0 +1,28 @@
+PostgreSQL migrations use the same Settings and infra/.env as the FastAPI app.
+The application never creates tables or applies migrations during startup.
+
+No revisions exist yet because no domain tables have been introduced.
+
+From the repository root, after configuring the backend and starting PostgreSQL:
+
+    backend/.venv/bin/alembic -c backend/alembic.ini current
+    backend/.venv/bin/alembic -c backend/alembic.ini check
+
+When adding the first domain model:
+
+1. Extend backend.models.base.Base and import the model in backend/models/__init__.py
+   so Alembic can discover its metadata.
+2. Generate a revision from the repository root:
+
+       backend/.venv/bin/alembic -c backend/alembic.ini revision --autogenerate -m "add domain table"
+
+3. Review both upgrade() and downgrade() before applying the revision:
+
+       backend/.venv/bin/alembic -c backend/alembic.ini upgrade head
+
+From the backend directory, use .venv/bin/alembic with the local alembic.ini.
+Connection timeout uses DATABASE_TIMEOUT_SECONDS. Migration execution time is
+not limited by the health check timeout.
+
+Async migration pattern:
+https://alembic.sqlalchemy.org/en/latest/cookbook.html#using-asyncio-with-alembic
