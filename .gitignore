@@ -56,3 +56,6 @@ htmlcov/
 .env
 .env.*
 !.env.example
+
+# Node.js development tooling
+node_modules/

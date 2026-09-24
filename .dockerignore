@@ -11,3 +11,4 @@ build
 !**/.env.example
 **/local.properties
 **/*.log
+**/node_modules

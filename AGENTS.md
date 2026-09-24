@@ -239,6 +239,20 @@ After completing an implementation:
 
 Never leave completed documentation or configuration changes uncommitted unless explicitly requested.
 
+Use `main` plus short-lived task branches and pull requests as the default workflow.
+Follow [docs/git-workflow.md](docs/git-workflow.md) for branch names, validation, and tags.
+Use `npm run git` for the selectable workflow or `npm run git:help` for explicit commands.
+
+The existing documentation/configuration workflow remains an exception for direct
+commits to `main`. Application source changes belong on a task branch and still
+require explicit user authorization before committing. The npm tooling does not
+expand that authorization. Git helper scripts under `.devcontainer/scripts/` are
+development configuration, not application source.
+
+Merge reviewed pull requests using merge commits. Do not automatically merge PRs,
+rewrite commits, force-push, or move existing tags. Record a new baseline with a
+new annotated tag after its changes are merged into `main` and verified.
+
 ---
 
 ## Project Conventions

@@ -1,0 +1,24 @@
+{
+  "name": "tennis-ai-devtools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Git workflow commands for the Tennis AI development environment",
+  "engines": {
+    "node": ">=22",
+    "npm": ">=9"
+  },
+  "scripts": {
+    "git": "node .devcontainer/scripts/git-workflow.mjs",
+    "git:help": "node .devcontainer/scripts/git-workflow.mjs --help",
+    "git:status": "node .devcontainer/scripts/git-workflow.mjs status",
+    "git:start": "node .devcontainer/scripts/git-workflow.mjs start",
+    "git:commit": "node .devcontainer/scripts/git-workflow.mjs commit",
+    "git:sync": "node .devcontainer/scripts/git-workflow.mjs sync",
+    "git:main": "node .devcontainer/scripts/git-workflow.mjs main",
+    "git:push": "node .devcontainer/scripts/git-workflow.mjs push",
+    "git:pr": "node .devcontainer/scripts/git-workflow.mjs pr",
+    "git:tag": "node .devcontainer/scripts/git-workflow.mjs tag",
+    "git:tag:push": "node .devcontainer/scripts/git-workflow.mjs publish-tag",
+    "test:git": "node --test .devcontainer/scripts/git-workflow*.test.mjs"
+  }
+}
