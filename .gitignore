@@ -53,6 +53,10 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+.ipynb_checkpoints/
+
+# Local AI experiments: input videos, model files, and generated results
+/notebooks/local/
 
 # Local configuration and secrets
 .env

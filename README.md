@@ -12,6 +12,9 @@ Flutter Android · FastAPI · PostgreSQL 프로젝트입니다.
 
 새 업무, 진행, 결정, 완료와 중단 사유는 `AGENTS.md`의 기록 규칙에 따라 Markdown에 갱신합니다.
 
+AI 실험은 [Colab 실행 안내](docs/colab.md)와 [환경 점검 노트북](notebooks/colab_setup.ipynb)에서
+준비합니다. 현재 노트북은 환경 확인용이며 모델 추론·학습은 아직 포함하지 않습니다.
+
 ## 현재 상태
 
 | 영역 | 준비 상태 |
@@ -53,8 +56,17 @@ Dev Container 설정 자체를 변경한 경우 이후 새 컨테이너에도 �
 
 ## 검증과 Android 빌드
 
+Codespaces에서는 코드 작성과 필요한 검증을 수행하고, Android 앱 빌드는 데스크탑에서
+수행합니다. APK/AAB와 빌드 폴더는 Git에서 제외합니다. 기존 GitHub Actions 빌드는 유지합니다.
+
 ```bash
 bash .devcontainer/scripts/check-development.sh
+```
+
+데스크탑에 Flutter·Android 개발환경을 준비한 뒤 저장소 루트에서 실행합니다.
+
+```bash
+flutter pub get --enforce-lockfile
 flutter build apk --debug
 ```
 
