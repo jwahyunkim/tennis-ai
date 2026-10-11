@@ -1,5 +1,23 @@
 # 운영과 모델 연결 준비
 
+## 코딩과 Android 빌드 환경
+
+2026-10-11 사용자 결정: Codespaces는 코드 작성·검토에 사용하고 Android 앱 빌드는
+데스크탑에서 수행합니다. Codespaces에서 APK/AAB 빌드를 기본 검증 절차로 실행하지 않습니다.
+필요한 정적 분석·테스트는 수행할 수 있으며, 기존 CI 빌드 설정은 그대로 유지합니다.
+
+Git에는 소스·설정·의존성 잠금 파일을 전달합니다. `build/`, `.dart_tool/`, Android Gradle
+캐시와 APK/AAB는 Git 제외 대상입니다. 데스크탑에서 동일 브랜치를 받은 뒤 의존성을
+설치하고 빌드 산출물을 재생성합니다. 데스크탑의 SDK·서명·API 주소 설정과 실제 빌드는
+아직 확인하지 않았습니다.
+
+Codespaces 디스크가 가득 찬 경우 먼저 `df -h`와 대상별 용량을 확인합니다. 앱 빌드가
+실행 중이지 않고 `build/`에 추적 파일이 없음을 확인한 뒤 재생성 가능한 빌드 산출물을
+정리할 수 있습니다. DB·영상 볼륨, 서명 키와 환경설정은 산출물이 아닙니다.
+공간 확보 후에도 worker가 unhealthy이면 아래 상태 확인 절차를 사용하고, 필요시
+`docker compose --env-file infra/.env -f infra/compose.yaml --profile app restart worker`로
+worker만 재시작한 뒤 heartbeat와 API readiness를 재확인합니다.
+
 ## 실행 구조
 
 ```mermaid
