@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-readonly PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly PROJECT_ROOT
 # shellcheck source=.devcontainer/scripts/dev-env.sh
 source "${PROJECT_ROOT}/.devcontainer/scripts/dev-env.sh"
 cd "${PROJECT_ROOT}"
@@ -30,4 +31,5 @@ if not env_path.exists():
 PY
 
 bash .devcontainer/scripts/start-services.sh
+backend/.venv/bin/alembic -c backend/alembic.ini upgrade head
 echo "Development setup complete. Activate Python with: source backend/.venv/bin/activate"

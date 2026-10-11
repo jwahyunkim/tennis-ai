@@ -26,9 +26,9 @@ Development environment:
 
 ## Project Structure
 
-`/app`
+`/lib` and root `pubspec.yaml`
 
-Flutter application.
+Flutter application. The app currently lives at the repository root; there is no `/app` directory.
 
 `/backend`
 
@@ -175,6 +175,42 @@ When implementing end-to-end functionality, use this sequence when applicable:
 ---
 
 ## AI Assistant Rules
+
+### Persistent Project Handoff and Progress
+
+At the start of every task, read [project status](docs/project-status.md) before
+choosing implementation work. Read [roadmap and decisions](docs/roadmap.md) for
+planning, costs, AI, or cloud work, and [operations](docs/operations.md) for runtime
+procedures. These files carry context across conversations; do not ask the user
+to reconstruct information already recorded there.
+
+- Record each new task in `docs/project-status.md` with a stable task ID, scope,
+  status, completed/total verifiable steps, dependencies, completion criteria,
+  and the next action before starting substantive work. Link follow-up tasks to
+  their predecessors rather than silently expanding completed tasks.
+- Update the task and append a dated activity entry when work starts, a
+  meaningful milestone or decision occurs, a blocker appears, or work ends.
+  Record interrupted work and the exact resume point before handing off.
+- Use the canonical statuses `미착수`, `진행 중`, `검증 대기`, `사용자 결정 대기`,
+  `차단`, `완료`, and `보류`.
+- Track progress using completed acceptance steps out of total steps. Do not
+  invent percentage completion or mark recommendations, builds, or untested
+  integrations as production-ready. Explain changes to the step count.
+- Mark work complete only with evidence: changed paths, tests/checks and dates,
+  results, and any limitations. Distinguish historical checks from checks run in
+  the current task and implementation completion from live runtime health.
+- Keep the current-work summary, task table, decision records, and next action
+  consistent. Append history without erasing previous outcomes; reference Git
+  for commit/push delivery evidence rather than predicting success.
+- Keep prices, tradeoffs, assumptions, source links, and their check dates in
+  `docs/roadmap.md`. User decisions and AI recommendations must remain distinct.
+  A backlog item or recommendation is not authorization to provision paid
+  resources, migrate data, publish services, or change the product scope.
+- Never put secrets, tokens, signed URLs, private user data, or model weights in
+  these documents. Record configuration names and safe verification outcomes.
+- Before the final response, update the handoff with completed work, remaining
+  work, blockers, and the next concrete action. Follow the existing documentation
+  commit/push workflow; never include unrelated or application source changes.
 
 Before modifying existing code:
 

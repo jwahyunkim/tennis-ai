@@ -20,6 +20,7 @@ RUN grep -rl "dl.yarnpkg.com" /etc/apt/sources.list.d 2>/dev/null \
     && apt-get update \
     && apt-get install -y \
         curl \
+        ffmpeg \
         git \
         git-lfs \
         ripgrep \
